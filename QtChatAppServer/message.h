@@ -46,6 +46,10 @@ public:
     void setCreatedDate(const QDateTime &newCreatedDate);
     QString getContent() const;
     void setContent(const QString &newContent);
+    QString getOwnerName() const;
+    void setOwnerName(const QString &newOwnerName);
+    QString getGroupName() const;
+    void setGroupName(const QString &newGroupName);
 };
 
 #endif // MESSAGE_H

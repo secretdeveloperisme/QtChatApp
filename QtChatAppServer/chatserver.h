@@ -2,6 +2,8 @@
 #ifndef CHATSERVER_H
 #define CHATSERVER_H
 
+#include "chatdatabasemanager.h"
+
 #include <QList>
 #include <QTcpServer>
 #include <QTcpSocket>
@@ -26,9 +28,10 @@ private slots:
 private:
     static QHostAddress address;
     static quint16 port;
-
     QTcpServer *server;
     QList<QTcpSocket *> clients;
+    ChatDatabaseManager databaseManager;
+
     void broadcastMessage(const QByteArray &content, QTcpSocket *excludeClient = nullptr);
 };
 

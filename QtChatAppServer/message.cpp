@@ -90,6 +90,26 @@ void Message::setContent(const QString &newContent)
     content = newContent;
 }
 
+QString Message::getOwnerName() const
+{
+    return ownerName;
+}
+
+void Message::setOwnerName(const QString &newOwnerName)
+{
+    ownerName = newOwnerName;
+}
+
+QString Message::getGroupName() const
+{
+    return groupName;
+}
+
+void Message::setGroupName(const QString &newGroupName)
+{
+    groupName = newGroupName;
+}
+
 Message::Message() {}
 
 Message::Message(quint64 ownerId,

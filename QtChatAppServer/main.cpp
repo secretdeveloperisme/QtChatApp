@@ -1,3 +1,4 @@
+#include "../QtChatAppClient/messagelistmodel.h"
 #include "chatserver.h"
 
 #include <QGuiApplication>

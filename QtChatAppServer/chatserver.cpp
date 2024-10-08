@@ -75,20 +75,30 @@ void ChatServer::onReadyRead()
     if (buffer.isEmpty())
         return;
     bool result{false};
-    Message message = MessageHandler::parseRawMessage(content, result);
+    qint8 messageType = content[0];
+    switch (messageType) {
+    case MessagePacket::OPCODE::GET_MESSAGES:
+        databaseManager.getMessagesByGroup(1);
+        break;
+    case MessagePacket::OPCODE::SEND:
+        Message message = MessageHandler::parseRawMessage(content.mid(1), result);
+        if (!result) {
+            qCritical() << "Cannot parse message from client";
+            return;
+        }
 
-    if (!result) {
-        qCritical() << "Cannot parse message from client";
-        return;
+        qDebug() << "Received message:" << message.toJson();
+
+        emit logMessage(QString("Received message from %1:%2")
+                            .arg(clientSocket->peerAddress().toString())
+                            .arg(clientSocket->peerPort()));
+        if (!databaseManager.addMessage(message)) {
+            qCritical() << "Could not insert message to database";
+            return;
+        }
+        broadcastMessage(MessagePacket(MessagePacket::OPCODE::SEND, content).toRawPacket(),
+                         clientSocket);
     }
-    qDebug() << "Received message:" << message.toJson();
-
-    emit logMessage(QString("Received message from %1:%2")
-                        .arg(clientSocket->peerAddress().toString())
-                        .arg(clientSocket->peerPort()));
-
-    broadcastMessage(MessagePacket(MessagePacket::OPCODE::SEND, content).toRawPacket(),
-                     clientSocket);
 }
 
 void ChatServer::onClientDisconnected()
