@@ -1,0 +1,40 @@
+#ifndef CHATCLIENT_H
+#define CHATCLIENT_H
+
+#include <QObject>
+#include <QTcpSocket>
+#include <message.h>
+#include <qtypes.h>
+class ChatClient : public QObject
+{
+    Q_OBJECT
+public:
+    ChatClient(QObject *parent = nullptr);
+    bool init();
+    Q_INVOKABLE bool sendMessage(quint64 ownerId,
+                                 const QString &onwerName,
+                                 quint64 groupId,
+                                 const QString &groupName,
+                                 const QString &content);
+
+    const static QHostAddress serverAddress;
+    const static quint16 serverPort;
+signals:
+    void receivedMessage(quint64 ownerId,
+                         const QString &onwerName,
+                         quint64 groupId,
+                         const QString &groupName,
+                         const QString &content);
+private slots:
+    void onReadyRead();
+    void onDisconnected();
+    void onConnected();
+
+private:
+    quint64 userId;
+    quint64 groupId;
+    QTcpSocket *client;
+    bool isConnected;
+};
+
+#endif // CHATCLIENT_H
