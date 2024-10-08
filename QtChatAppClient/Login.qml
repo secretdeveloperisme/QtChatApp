@@ -129,12 +129,12 @@ ApplicationWindow {
 
                 var component = Qt.createComponent("ChatApp.qml")
                 var window = component.createObject()
-                window.username = usernameInput.text
-                if (profiles[window.username] !== undefined) {
-                    window.userId = profiles[window.username]
+                window.m_username = usernameInput.text
+                if (profiles[window.m_username] !== undefined) {
+                    window.m_userId = profiles[window.m_username]
                 }
-                window.groupId = groupCombo.currentValue
-                window.groupName = groupCombo.currentText
+                window.m_groupId = groupCombo.currentValue
+                window.m_groupName = groupCombo.currentText
                 window.show()
                 root.close()
             }

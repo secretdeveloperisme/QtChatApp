@@ -3,14 +3,15 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 Window {
+    id: root
     visible: true
     width: 450
     height: 600
     title: qsTr("Chat App")
-    property int userId
-    property string username: "unknown"
-    property int groupId
-    property string groupName: "unknown"
+    property int m_userId
+    property string m_username: "unknown"
+    property int m_groupId
+    property string m_groupName: "unknown"
 
     Rectangle {
         border.width: 1
@@ -36,14 +37,14 @@ Window {
                     width: parent.width
                     height: 50
                     Text {
-                        id: userName
-                        text: "User: " + username
+                        id: userNameLabel
+                        text: "User: " + m_username
                         font.pixelSize: 18
                         anchors.left: parent.left
                     }
                     Text {
                         id: groupdId
-                        text: "Group: " + groupName
+                        text: "Group: " + m_groupName
                         font.pixelSize: 18
                         anchors.right: parent.right
                         anchors.rightMargin: 20
@@ -57,7 +58,7 @@ Window {
                 Layout.fillHeight: true
                 clip: true
 
-                model: chatModel
+                model: messageListModel
                 delegate: Item {
                     width: chatListView.width
                     height: 80
@@ -68,14 +69,14 @@ Window {
 
                         Rectangle {
                             id: incomingAvatar
-                            visible: messageType == "incoming"
+                            visible: ownerId != root.m_userId
                             width: 40
                             height: 40
                             radius: 20
                             color: "lightgray"
                             Text {
                                 anchors.centerIn: parent
-                                text: initials
+                                text: ownerName.charAt(0).toUpperCase()
                                 font.pixelSize: 16
                             }
                         }
@@ -83,12 +84,12 @@ Window {
                         Rectangle {
                             width: parent.width - 40 - 10
                             height: 40
-                            color: messageType == "incoming" ? "lightblue" : "lightgreen"
+                            color: ownerId == root.m_userId ? "lightblue" : "lightgreen"
                             radius: 10
                             border.color: "gray"
                             Text {
                                 anchors.fill: parent
-                                text: messageText
+                                text: content
                                 padding: 10
                                 wrapMode: Text.WordWrap
                             }
@@ -96,7 +97,7 @@ Window {
 
                         Rectangle {
                             id: outgoingAvatar
-                            visible: messageType == "outgoing"
+                            visible: ownerId == root.m_userId
                             width: 40
                             height: 40
                             radius: 20
@@ -109,16 +110,6 @@ Window {
                             }
                         }
                     }
-                }
-                function addItem(text, messageType, username) {
-
-                    chatModel.append({
-                                         "messageText": text,
-                                         "messageType": messageType,
-                                         "initials": username.charAt(
-                                                         0).toUpperCase()
-                                     })
-                    chatListView.positionViewAtEnd()
                 }
 
                 Component.onCompleted: {
@@ -151,11 +142,9 @@ Window {
 
                     onClicked: {
                         if (inputField.text !== "") {
-                            if (chatClient.sendMessage(userId, username,
-                                                       groupId, groupName,
+                            if (chatClient.sendMessage(m_userId, m_username,
+                                                       m_groupId, m_groupName,
                                                        inputField.text)) {
-                                chatListView.addItem(inputField.text,
-                                                     "outgoing", "")
                                 inputField.text = ""
                             }
                         }
@@ -163,15 +152,5 @@ Window {
                 }
             }
         }
-    }
-    Connections {
-        target: chatClient
-        function onReceivedMessage(ownerId, ownerName, groupId, groupName, content) {
-            chatListView.addItem(content, "incoming", ownerName)
-        }
-    }
-
-    ListModel {
-        id: chatModel
     }
 }

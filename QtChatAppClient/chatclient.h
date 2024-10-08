@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QTcpSocket>
+#include "messagelistmodel.h"
 #include <message.h>
 #include <qtypes.h>
 class ChatClient : public QObject
@@ -11,11 +12,13 @@ class ChatClient : public QObject
 public:
     ChatClient(QObject *parent = nullptr);
     bool init();
+    void setMessageListModel(MessageListModel *messageListModel);
     Q_INVOKABLE bool sendMessage(quint64 ownerId,
                                  const QString &onwerName,
                                  quint64 groupId,
                                  const QString &groupName,
                                  const QString &content);
+    Q_INVOKABLE bool loadMessageByGroupId(quint64 groupId);
 
     const static QHostAddress serverAddress;
     const static quint16 serverPort;
@@ -35,6 +38,7 @@ private:
     quint64 groupId;
     QTcpSocket *client;
     bool isConnected;
+    MessageListModel *messageListModel;
 };
 
 #endif // CHATCLIENT_H

@@ -25,6 +25,8 @@ qt_add_qml_module(appQtChatAppClient
         SOURCES messagepacket.cpp
         SOURCES chatclient.h chatclient.cpp
         QML_FILES Login.qml
+        SOURCES messagelistmodel.h
+        SOURCES messagelistmodel.cpp
 )
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.

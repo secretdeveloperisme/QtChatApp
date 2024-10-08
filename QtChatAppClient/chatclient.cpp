@@ -5,7 +5,7 @@
 #include <QJsonDocument>
 #include "messagehandler.h"
 #include "messagepacket.h"
-// Define static members
+
 const QHostAddress ChatClient::serverAddress = QHostAddress("127.0.0.1");
 const quint16 ChatClient::serverPort = 8080;
 
@@ -35,6 +35,11 @@ bool ChatClient::init()
     return true;
 }
 
+void ChatClient::setMessageListModel(MessageListModel *messageListModel)
+{
+    this->messageListModel = messageListModel;
+}
+
 Q_INVOKABLE bool ChatClient::sendMessage(quint64 ownerId,
                                          const QString &ownerName,
                                          quint64 groupId,
@@ -47,10 +52,16 @@ Q_INVOKABLE bool ChatClient::sendMessage(quint64 ownerId,
     }
 
     Message message{ownerId, ownerName, groupId, groupName, content, QDateTime::currentDateTime()};
+    messageListModel->addMessage(message);
     MessagePacket packet{MessagePacket::SEND, message.toJson().toJson()};
 
     client->write(packet.toRawPacket());
     return client->waitForBytesWritten();
+}
+
+bool ChatClient::loadMessageByGroupId(quint64 groupId)
+{
+    return true;
 }
 
 void ChatClient::onReadyRead()
@@ -84,6 +95,7 @@ void ChatClient::onReadyRead()
         qCritical() << "Cannot parse message from client";
         return;
     }
+    messageListModel->addMessage(message);
     qDebug() << "Received message:" << message.toJson();
     emit receivedMessage(message.getOwnerId(),
                          message.getOwnerName(),
