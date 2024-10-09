@@ -68,10 +68,7 @@ bool ChatClient::loadMessageByGroupId(quint64 groupId)
     memcpy(bytes, &groupId, sizeof(quint64));
     data.append(bytes);
 
-    qDebug() << "loadMessage from group: " << groupId;
-
     MessagePacket packet{MessagePacket::REQUEST_MESSAGES, data};
-    qDebug() << "loadMessage from group bytes: " << packet.toRawPacket();
 
     client->write(packet.toRawPacket());
     return client->waitForBytesWritten();
@@ -85,21 +82,35 @@ void ChatClient::onReadyRead()
     if (clientSocket->bytesAvailable() <= 0) {
         return;
     }
-    char rawBuffer[1024];
-    QByteArray buffer;
+    char rawBuffer[1024]{0};
+
     QByteArray content;
 
     int readBytes{0};
     int indexOf{-1};
-    while ((readBytes = clientSocket->read(rawBuffer, 1024)) > 0) {
+
+    bool firstSection = true;
+
+    while (true) {
+        if ((readBytes = clientSocket->read(rawBuffer, 1024)) <= 0)
+            break;
+        QByteArray buffer;
         buffer.setRawData(rawBuffer, readBytes);
+        if (firstSection) {
+            if (!buffer.startsWith(MessagePacket::BEGIN_MESSGAGE)) {
+                qCritical() << "Invalid packet format";
+                return;
+            }
+            firstSection = false;
+            buffer = buffer.mid(2, buffer.length() - 2);
+        }
         if ((indexOf = buffer.indexOf(MessagePacket::END_MESSAGE)) > 0) {
             content.append(buffer, indexOf);
         } else {
-            content.append(buffer, readBytes);
+            content.append(buffer);
         }
     }
-    if (buffer.isEmpty())
+    if (content.isEmpty())
         return;
     bool result{false};
     quint8 opcode = content[0];

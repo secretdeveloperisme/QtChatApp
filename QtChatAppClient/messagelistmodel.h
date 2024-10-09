@@ -3,7 +3,7 @@
 
 #include <QAbstractListModel>
 #include <QVector>
-#include "../QtChatAppServer/message.h"
+#include "message.h"
 
 class MessageListModel : public QAbstractListModel
 {

@@ -29,7 +29,6 @@ signals:
                          quint64 groupId,
                          const QString &groupName,
                          const QString &content);
-
 private:
     const static QHostAddress serverAddress;
     const static quint16 serverPort;

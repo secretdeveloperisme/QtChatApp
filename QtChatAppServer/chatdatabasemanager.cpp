@@ -93,9 +93,8 @@ Messages ChatDatabaseManager::getMessagesByGroup(int groupId)
 
 bool ChatDatabaseManager::connect()
 {
-    db = QSqlDatabase::addDatabase("QSQLITE"); // Changed to SQLite
-    db.setDatabaseName("chat_app.db");         // SQLite stores data in a file
-
+    db = QSqlDatabase::addDatabase("QSQLITE");
+    db.setDatabaseName("chat_app.db");
     if (!db.open()) {
         qDebug() << "Error: " << db.lastError().text();
         return false;

@@ -14,6 +14,7 @@ public:
     QList<Message> getMessages();
     void addMessage(const Message &message);
     QJsonDocument toJson();
+
     static Messages fromJson(QJsonDocument document);
 
     using iterator = QList<Message>::iterator;

@@ -64,15 +64,28 @@ void ChatServer::onReadyRead()
 
     int readBytes{0};
     int indexOf{-1};
-    while ((readBytes = clientSocket->read(rawBuffer, 1024)) > 0) {
+    bool firstSection = true;
+
+    while (true) {
+        if ((readBytes = clientSocket->read(rawBuffer, 1024)) <= 0)
+            break;
+        QByteArray buffer;
         buffer.setRawData(rawBuffer, readBytes);
+        if (firstSection) {
+            if (!buffer.startsWith(MessagePacket::BEGIN_MESSGAGE)) {
+                qCritical() << "Invalid packet format";
+                return;
+            }
+            firstSection = false;
+            buffer = buffer.mid(2, buffer.length() - 2);
+        }
         if ((indexOf = buffer.indexOf(MessagePacket::END_MESSAGE)) > 0) {
             content.append(buffer, indexOf);
         } else {
-            content.append(buffer, readBytes);
+            content.append(buffer);
         }
     }
-    if (buffer.isEmpty())
+    if (content.isEmpty())
         return;
     bool result{false};
     qint8 messageType = content[0];
@@ -87,7 +100,8 @@ void ChatServer::onReadyRead()
             Messages messages = databaseManager.getMessagesByGroup(groupId);
             QJsonDocument messagesJson = messages.toJson();
             MessagePacket messagesPacket{MessagePacket::OPCODE::GET_MESSAGES, messagesJson.toJson()};
-            clientSocket->write(messagesPacket.toRawPacket());
+            QByteArray rawBytes = messagesPacket.toRawPacket();
+            clientSocket->write(rawBytes);
             if (!clientSocket->waitForBytesWritten(5000)) {
                 qInfo() << "Could not send packet for get all message from group: " << groupId;
             }

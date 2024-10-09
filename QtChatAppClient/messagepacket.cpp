@@ -33,6 +33,7 @@ void MessagePacket::setData(const QByteArray &newData)
 QByteArray MessagePacket::toRawPacket()
 {
     QByteArray rawPacket;
+    rawPacket.append(BEGIN_MESSGAGE);
     rawPacket.append(opcode);
     rawPacket.append(data);
     rawPacket.append(END_MESSAGE);
