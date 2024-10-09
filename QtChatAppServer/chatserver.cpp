@@ -77,9 +77,24 @@ void ChatServer::onReadyRead()
     bool result{false};
     qint8 messageType = content[0];
     switch (messageType) {
-    case MessagePacket::OPCODE::GET_MESSAGES:
-        databaseManager.getMessagesByGroup(1);
+    case MessagePacket::OPCODE::REQUEST_MESSAGES: {
+        bool is_ok{false};
+        uint groupId{0};
+        QByteArray data{content.mid(1)};
+        memcpy((char *) &groupId, data.data(), data.length());
+        if (groupId > 0) {
+            qInfo() << "Received request to get all message from group: " << groupId;
+            Messages messages = databaseManager.getMessagesByGroup(groupId);
+            QJsonDocument messagesJson = messages.toJson();
+            MessagePacket messagesPacket{MessagePacket::OPCODE::GET_MESSAGES, messagesJson.toJson()};
+            clientSocket->write(messagesPacket.toRawPacket());
+            if (!clientSocket->waitForBytesWritten(5000)) {
+                qInfo() << "Could not send packet for get all message from group: " << groupId;
+            }
+        }
+
         break;
+    }
     case MessagePacket::OPCODE::SEND:
         Message message = MessageHandler::parseRawMessage(content.mid(1), result);
         if (!result) {
@@ -98,6 +113,7 @@ void ChatServer::onReadyRead()
         }
         broadcastMessage(MessagePacket(MessagePacket::OPCODE::SEND, content).toRawPacket(),
                          clientSocket);
+        break;
     }
 }
 

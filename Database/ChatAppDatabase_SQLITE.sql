@@ -22,3 +22,9 @@ INSERT INTO CHAT_USERS(username) VALUES("phucnguyen");
 INSERT INTO CHAT_GROUPS(name) VALUES("Work");
 INSERT INTO CHAT_GROUPS(name) VALUES("Student");
 INSERT INTO CHAT_GROUPS(name) VALUES("C++ Class");
+
+
+SELECT m.id, content, createdDate, user_id, u.username, group_id, g.name FROM CHAT_MESSAGES m 
+        JOIN  CHAT_GROUPS g ON m.group_id = g.id 
+        JOIN CHAT_USERS u on m.user_id = u.id
+        

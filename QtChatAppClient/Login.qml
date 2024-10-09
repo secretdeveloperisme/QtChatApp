@@ -4,7 +4,7 @@ import QtQuick.Layouts
 
 ApplicationWindow {
     id: root
-    title: "Login"
+    title: "Login Chat"
     width: 400
     height: 300
     visible: true
@@ -19,7 +19,6 @@ ApplicationWindow {
         anchors.margins: 20
         spacing: 15
 
-        // Title section
         Text {
             id: title
             text: qsTr("Login")
@@ -30,7 +29,6 @@ ApplicationWindow {
             Layout.alignment: Qt.AlignHCenter
         }
 
-        // Username section
         RowLayout {
             Layout.fillWidth: true
             spacing: 10
@@ -50,7 +48,6 @@ ApplicationWindow {
                 font.pixelSize: 16
                 placeholderText: "Enter username"
 
-                // Customization for TextField
                 background: Rectangle {
                     color: "#fff"
                     radius: 10
@@ -61,7 +58,6 @@ ApplicationWindow {
             }
         }
 
-        // Group ComboBox section
         RowLayout {
             Layout.fillWidth: true
             spacing: 10
@@ -81,7 +77,8 @@ ApplicationWindow {
                 font.pixelSize: 16
                 textRole: "key"
                 valueRole: "value"
-                // Customization for ComboBox
+                currentIndex: 0
+
                 background: Rectangle {
                     color: "#fff"
                     radius: 10
@@ -108,7 +105,6 @@ ApplicationWindow {
             }
         }
 
-        // Login button
         Button {
             id: btnLogin
             text: "Chat Now"
@@ -135,6 +131,8 @@ ApplicationWindow {
                 }
                 window.m_groupId = groupCombo.currentValue
                 window.m_groupName = groupCombo.currentText
+
+                window.loadMessageFromGroup()
                 window.show()
                 root.close()
             }

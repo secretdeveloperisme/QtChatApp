@@ -13,6 +13,11 @@ Window {
     property int m_groupId
     property string m_groupName: "unknown"
 
+    function loadMessageFromGroup(groupId) {
+        if (chatClient.loadMessageByGroupId(root.m_groupId))
+            chatListView.positionViewAtEnd()
+    }
+
     Rectangle {
         border.width: 1
         border.color: "black"
@@ -111,10 +116,7 @@ Window {
                         }
                     }
                 }
-
-                Component.onCompleted: {
-                    chatListView.positionViewAtEnd()
-                }
+                Component.onCompleted: positionViewAtEnd()
             }
 
             Row {
@@ -146,11 +148,18 @@ Window {
                                                        m_groupId, m_groupName,
                                                        inputField.text)) {
                                 inputField.text = ""
+                                chatListView.positionViewAtEnd()
                             }
                         }
                     }
                 }
             }
+        }
+    }
+    Connections {
+        target: chatClient
+        function onReceivedMessage() {
+            chatListView.positionViewAtEnd()
         }
     }
 }

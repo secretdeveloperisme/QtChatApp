@@ -5,9 +5,11 @@
 #include <QJsonDocument>
 #include "messagehandler.h"
 #include "messagepacket.h"
+#include "messages.h"
+#include "string.h"
 
-const QHostAddress ChatClient::serverAddress = QHostAddress("127.0.0.1");
-const quint16 ChatClient::serverPort = 8080;
+const QHostAddress ChatClient::serverAddress{"127.0.0.1"};
+const quint16 ChatClient::serverPort{8080};
 
 ChatClient::ChatClient(QObject *parent)
     : QObject(parent)
@@ -61,7 +63,18 @@ Q_INVOKABLE bool ChatClient::sendMessage(quint64 ownerId,
 
 bool ChatClient::loadMessageByGroupId(quint64 groupId)
 {
-    return true;
+    QByteArray data;
+    char bytes[8];
+    memcpy(bytes, &groupId, sizeof(quint64));
+    data.append(bytes);
+
+    qDebug() << "loadMessage from group: " << groupId;
+
+    MessagePacket packet{MessagePacket::REQUEST_MESSAGES, data};
+    qDebug() << "loadMessage from group bytes: " << packet.toRawPacket();
+
+    client->write(packet.toRawPacket());
+    return client->waitForBytesWritten();
 }
 
 void ChatClient::onReadyRead()
@@ -89,19 +102,35 @@ void ChatClient::onReadyRead()
     if (buffer.isEmpty())
         return;
     bool result{false};
-    Message message = MessageHandler::parseRawMessage(content.mid(1, content.length() - 1), result);
+    quint8 opcode = content[0];
+    QByteArray data = content.mid(1, content.length() - 1);
 
-    if (!result) {
-        qCritical() << "Cannot parse message from client";
-        return;
+    switch (opcode) {
+    case MessagePacket::OPCODE::GET_MESSAGES: {
+        QJsonDocument messagesJson = QJsonDocument::fromJson(data);
+        if (messagesJson.isArray()) {
+            Messages messages = Messages::fromJson(messagesJson);
+            for (auto message = messages.begin(); message != messages.end(); message++) {
+                this->messageListModel->addMessage(*message);
+            }
+        }
+        break;
     }
-    messageListModel->addMessage(message);
-    qDebug() << "Received message:" << message.toJson();
-    emit receivedMessage(message.getOwnerId(),
-                         message.getOwnerName(),
-                         message.getGroupId(),
-                         message.getGroupName(),
-                         message.getContent());
+
+    case MessagePacket::OPCODE::SEND:
+        Message message = MessageHandler::parseRawMessage(data, result);
+        if (!result) {
+            qCritical() << "Cannot parse message from client";
+            return;
+        }
+        messageListModel->addMessage(message);
+        emit receivedMessage(message.getOwnerId(),
+                             message.getOwnerName(),
+                             message.getGroupId(),
+                             message.getGroupName(),
+                             message.getContent());
+        break;
+    }
 }
 
 void ChatClient::onDisconnected()

@@ -3,6 +3,7 @@
 #define CHATDATABASEMANAGER_H
 
 #include "message.h"
+#include "messages.h"
 
 #include <QDebug>
 #include <QtSql/QSqlDatabase>
@@ -26,7 +27,7 @@ public:
     bool addMessage(const Message &messsage);
 
     // Fetch messages by group
-    void getMessagesByGroup(int groupId);
+    Messages getMessagesByGroup(int groupId);
 
 private:
     QSqlDatabase db;

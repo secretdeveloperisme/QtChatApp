@@ -59,25 +59,36 @@ bool ChatDatabaseManager::addMessage(const Message &message)
     return true;
 }
 
-void ChatDatabaseManager::getMessagesByGroup(int groupId)
+Messages ChatDatabaseManager::getMessagesByGroup(int groupId)
 {
     QSqlQuery query;
-    query.prepare(
-        "SELECT content, createdDate, user_id FROM chat_messages WHERE group_id = :group_id");
+    Messages messages;
+    query.prepare("SELECT m.id, content, createdDate, user_id, u.username, group_id, g.name FROM "
+                  "CHAT_MESSAGES m "
+                  "JOIN  CHAT_GROUPS g ON m.group_id = g.id "
+                  "JOIN CHAT_USERS u on m.user_id = u.id WHERE "
+                  "group_id = :group_id");
     query.bindValue(":group_id", groupId);
 
     if (!query.exec()) {
         qDebug() << "Failed to fetch messages:" << query.lastError().text();
-        return;
+        return {};
     }
 
     while (query.next()) {
-        QString content = query.value(0).toString();
-        QString createdDate = query.value(1).toString();
-        int userId = query.value(2).toInt();
+        quint64 id = query.value(0).toULongLong();
+        QString content = query.value(1).toString();
+        QDateTime createdDate = query.value(2).toDateTime();
+        quint64 userId = query.value(3).toInt();
+        QString username = query.value(4).toString();
+        quint64 groupId = query.value(5).toULongLong();
+        QString groupName = query.value(6).toString();
 
         qDebug() << "User ID:" << userId << "Message:" << content << "Date:" << createdDate;
+        Message message{id, userId, username, groupId, groupName, content, createdDate};
+        messages.addMessage(message);
     }
+    return messages;
 }
 
 bool ChatDatabaseManager::connect()

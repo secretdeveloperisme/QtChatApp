@@ -22,12 +22,10 @@ public:
         CreatedDateRole
     };
 
-    // QAbstractListModel overrides
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
     QHash<int, QByteArray> roleNames() const override;
 
-    // Custom method to add messages
     void addMessage(const Message &message);
 
 private:

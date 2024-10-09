@@ -30,6 +30,19 @@ Message Message::fromJson(const QJsonDocument &jsonDocument)
     return message;
 }
 
+Message Message::fromJsonObject(const QJsonObject &jsonObject)
+{
+    Message message;
+    message.id = jsonObject["id"].toInt();
+    message.ownerId = jsonObject["onwerId"].toInt();
+    message.ownerName = jsonObject["ownerName"].toString();
+    message.groupId = jsonObject["groupId"].toInt();
+    message.groupName = jsonObject["groupName"].toString();
+    message.content = jsonObject["content"].toString();
+    message.createdDate = QDateTime::fromString(jsonObject["createdDate"].toString());
+    return message;
+}
+
 quint64 Message::getId() const
 {
     return id;

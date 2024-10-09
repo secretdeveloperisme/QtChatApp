@@ -34,6 +34,7 @@ public:
 
     QJsonDocument toJson();
     static Message fromJson(const QJsonDocument &jsonDocument);
+    static Message fromJsonObject(const QJsonObject &jsonObject);
 
     //getter settter
     quint64 getId() const;

@@ -7,7 +7,7 @@
 class MessagePacket
 {
 public:
-    enum OPCODE { SEND = 0x12, GET_MESSAGES = 0x13, GET_GROUPS = 0x14 };
+    enum OPCODE { SEND = 0x12, REQUEST_MESSAGES, GET_MESSAGES, REQUEST_GROUPS, GET_GROUPS };
     const static QByteArrayView END_MESSAGE;
     const static QByteArrayView BEGIN_MESSGAGE;
 
